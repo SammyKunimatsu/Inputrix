@@ -15,7 +15,8 @@
     "copy:static": "node scripts/copy-static.cjs",
     "build": "npm run build:ts && npm run copy:static",
     "start": "npm run build && electron .",
-    "dist": "npm run build && electron-builder --win nsis"
+    "dist": "npm run build && electron-builder --win nsis",
+    "dist:win": "npm run build && electron-builder --win nsis"
   },
   "build": {
     "appId": "com.sammykunimatsu.inputrix",
