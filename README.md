@@ -3,14 +3,14 @@
   <h1>Inputrix</h1>
   <p><strong>Console de Automação de Hardware de Baixo Nível (Teclado & Mouse) para Windows</strong></p>
   <p>
-    <a href="https://github.com/SammyKunimatsu/Inputrix/releases/latest"><img src="https://img.shields.io/badge/version-1.0.0-3B82F6?style=flat-square" alt="Version 1.0.0" /></a>
+    <a href="https://github.com/SammyKunimatsu/Inputrix/releases/latest"><img src="https://img.shields.io/badge/version-1.0.1-3B82F6?style=flat-square" alt="Version 1.0.1" /></a>
     <img src="https://img.shields.io/badge/platform-Windows%2010%2F11-0B0F17?style=flat-square" alt="Platform Windows" />
-    <img src="https://img.shields.io/badge/stack-Electron%20%2B%20TypeScript%20%2B%20Python%20Win32-10B981?style=flat-square" alt="Tech Stack" />
+    <img src="https://img.shields.io/badge/stack-Electron%20%2B%20TypeScript%20%2B%20Win32%20Engine-10B981?style=flat-square" alt="Tech Stack" />
   </p>
   <p>
     <a href="https://github.com/SammyKunimatsu/Inputrix/releases/latest"><strong>⬇️ Baixar Instalador (GitHub Releases)</strong></a>
     &nbsp;•&nbsp;
-    <a href="https://github.com/SammyKunimatsu/Inputrix/releases/download/v1.0.0/Inputrix-Setup-1.0.0.exe"><strong>Download Direto (Inputrix-Setup-1.0.0.exe)</strong></a>
+    <a href="https://github.com/SammyKunimatsu/Inputrix/releases/download/v1.0.1/Inputrix-Setup-1.0.1.exe"><strong>Download Direto (Inputrix-Setup-1.0.1.exe)</strong></a>
   </p>
 </div>
 
@@ -24,12 +24,12 @@ O **Inputrix** é uma estação de automação de entradas físicas de teclado e
 
 ## 📥 Download & Instalação (Usuários)
 
-Você não precisa compilar o código para usar o Inputrix. Basta baixar o instalador oficial diretamente na página de **Releases**:
+Você não precisa compilar o código nem instalar nada extra para usar o Inputrix. Basta baixar o instalador oficial diretamente na página de **Releases**:
 
-1. Acesse a página oficial de [**Releases do Inputrix**](https://github.com/SammyKunimatsu/Inputrix/releases/latest) (ou clique aqui para [**Baixar o Inputrix-Setup-1.0.0.exe diretamente**](https://github.com/SammyKunimatsu/Inputrix/releases/download/v1.0.0/Inputrix-Setup-1.0.0.exe)).
-2. Execute o instalador **`Inputrix-Setup-1.0.0.exe`** e escolha o diretório de instalação.
-3. Certifique-se de ter o [**Python 3.8+**](https://www.python.org/downloads/) instalado no Windows (com a opção `Add Python to PATH` marcada) para o motor nativo `Win32`.
-4. **Atualizações Automáticas**: A partir da versão `1.0.0`, todas as novas versões estáveis (ou Beta, caso você ative a opção **Beta Tester** em *Configurações*) são baixadas e instaladas diretamente por dentro do aplicativo com 1 clique.
+1. Acesse a página oficial de [**Releases do Inputrix**](https://github.com/SammyKunimatsu/Inputrix/releases/latest) (ou clique aqui para [**Baixar o Inputrix-Setup-1.0.1.exe diretamente**](https://github.com/SammyKunimatsu/Inputrix/releases/download/v1.0.1/Inputrix-Setup-1.0.1.exe)).
+2. Execute o instalador **`Inputrix-Setup-1.0.1.exe`** e escolha o diretório de instalação *(caso apareça o aviso do Windows SmartScreen, clique em **Mais informações** → **Executar assim mesmo**)*.
+3. **Motor Nativo Incluso**: A partir da versão `1.0.1`, o motor de baixo nível `Win32` (`engine.exe`) já vem compilado e embutido dentro do instalador — **não é necessário ter Python instalado no computador**.
+4. **Atualizações Automáticas**: Todas as novas versões estáveis (ou Beta, caso você ative a opção **Beta Tester** em *Configurações*) são baixadas e instaladas diretamente por dentro do aplicativo com 1 clique.
 
 ---
 

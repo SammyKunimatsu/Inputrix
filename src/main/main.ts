@@ -24,15 +24,22 @@ const savesPath = path.join(userDataDir, 'saves.json')
 const settingsPath = path.join(userDataDir, 'settings.json')
 
 const resolveAsset = (file: string) => {
-  const devPath = path.join(__dirname, '..', '..', 'assets', file)
-  if (fs.existsSync(devPath)) return devPath
-  return path.join(process.resourcesPath, 'assets', file)
+  if (app.isPackaged) {
+    const resAsset = path.join(process.resourcesPath, 'assets', file)
+    if (fs.existsSync(resAsset)) return resAsset
+  }
+  return path.join(__dirname, '..', '..', 'assets', file)
 }
 
-const resolveEngineScript = () => {
-  const distEngine = path.join(__dirname, '..', 'engine', 'engine.py')
-  if (fs.existsSync(distEngine)) return distEngine
-  return path.join(process.resourcesPath, 'engine.py')
+const resolveEngineBinary = (): { cmd: string; args: string[] } => {
+  if (app.isPackaged) {
+    const exePath = path.join(process.resourcesPath, 'engine.exe')
+    if (fs.existsSync(exePath)) return { cmd: exePath, args: [] }
+    return { cmd: 'python', args: ['-u', path.join(process.resourcesPath, 'engine.py')] }
+  }
+  const devExe = path.join(__dirname, '..', '..', 'src', 'engine', 'engine.exe')
+  if (fs.existsSync(devExe)) return { cmd: devExe, args: [] }
+  return { cmd: 'python', args: ['-u', path.join(__dirname, '..', 'engine', 'engine.py')] }
 }
 
 const iconIcoPath = resolveAsset('icon.ico')
@@ -100,8 +107,12 @@ const broadcast = (channel: string, data: any) => {
 }
 
 const startEngine = () => {
-  const scriptPath = resolveEngineScript()
-  pyProc = spawn('python', ['-u', scriptPath], { stdio: ['pipe', 'pipe', 'pipe'] })
+  const { cmd, args } = resolveEngineBinary()
+  pyProc = spawn(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true })
+  pyProc.on('error', () => {
+    const fallbackScript = app.isPackaged ? path.join(process.resourcesPath, 'engine.py') : path.join(__dirname, '..', 'engine', 'engine.py')
+    if (cmd !== 'py') pyProc = spawn('py', ['-u', fallbackScript], { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true })
+  })
   let buffer = ''
 
   pyProc.stdout?.on('data', (chunk: Buffer) => {
@@ -424,9 +435,15 @@ ipcMain.on('win-ctrl', (_e, action) => {
 
 app.on('before-quit', () => {
   isQuitting = true
+  sendToEngine({ cmd: 'quit' })
 })
 
 app.on('will-quit', () => {
   globalShortcut.unregisterAll()
-  if (pyProc) pyProc.kill()
+  if (pyProc && pyProc.pid) {
+    try {
+      spawn('taskkill', ['/pid', String(pyProc.pid), '/T', '/F'], { windowsHide: true })
+    } catch (_e) {}
+    pyProc.kill()
+  }
 })
