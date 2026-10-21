@@ -3,9 +3,14 @@
   <h1>Inputrix</h1>
   <p><strong>Console de Automação de Hardware de Baixo Nível (Teclado & Mouse) para Windows</strong></p>
   <p>
-    <img src="https://img.shields.io/badge/version-1.0.0-3B82F6?style=flat-square" alt="Version 1.0.0" />
+    <a href="https://github.com/SammyKunimatsu/Inputrix/releases/latest"><img src="https://img.shields.io/badge/version-1.0.0-3B82F6?style=flat-square" alt="Version 1.0.0" /></a>
     <img src="https://img.shields.io/badge/platform-Windows%2010%2F11-0B0F17?style=flat-square" alt="Platform Windows" />
     <img src="https://img.shields.io/badge/stack-Electron%20%2B%20TypeScript%20%2B%20Python%20Win32-10B981?style=flat-square" alt="Tech Stack" />
+  </p>
+  <p>
+    <a href="https://github.com/SammyKunimatsu/Inputrix/releases/latest"><strong>⬇️ Baixar Instalador (GitHub Releases)</strong></a>
+    &nbsp;•&nbsp;
+    <a href="https://github.com/SammyKunimatsu/Inputrix/releases/download/v1.0.0/Inputrix-Setup-1.0.0.exe"><strong>Download Direto (Inputrix-Setup-1.0.0.exe)</strong></a>
   </p>
 </div>
 
@@ -14,6 +19,17 @@
 ## Visão Geral
 
 O **Inputrix** é uma estação de automação de entradas físicas de teclado e mouse projetada para Windows. Ao contrário de automatizadores convencionais que utilizam eventos sintéticos de alto nível facilmente ignorados por jogos e aplicações DirectInput, o Inputrix opera diretamente sobre a API `user32.dll` (`SendInput` com `KEYEVENTF_SCANCODE`), emulando sinais reais de hardware com proteção anti-colisão.
+
+---
+
+## 📥 Download & Instalação (Usuários)
+
+Você não precisa compilar o código para usar o Inputrix. Basta baixar o instalador oficial diretamente na página de **Releases**:
+
+1. Acesse a página oficial de [**Releases do Inputrix**](https://github.com/SammyKunimatsu/Inputrix/releases/latest) (ou clique aqui para [**Baixar o Inputrix-Setup-1.0.0.exe diretamente**](https://github.com/SammyKunimatsu/Inputrix/releases/download/v1.0.0/Inputrix-Setup-1.0.0.exe)).
+2. Execute o instalador **`Inputrix-Setup-1.0.0.exe`** e escolha o diretório de instalação.
+3. Certifique-se de ter o [**Python 3.8+**](https://www.python.org/downloads/) instalado no Windows (com a opção `Add Python to PATH` marcada) para o motor nativo `Win32`.
+4. **Atualizações Automáticas**: A partir da versão `1.0.0`, todas as novas versões estáveis (ou Beta, caso você ative a opção **Beta Tester** em *Configurações*) são baixadas e instaladas diretamente por dentro do aplicativo com 1 clique.
 
 ---
 
@@ -36,7 +52,7 @@ O **Inputrix** é uma estação de automação de entradas físicas de teclado e
 - **Bandeja do Sistema (System Tray) & Notificações**:
   - Ao fechar a janela, o Inputrix continua executando silenciosamente em segundo plano na bandeja do Windows, enviando notificações nativas ao iniciar ou parar ciclos.
 - **Sistema de Atualização Automática Integrado (Estável & Beta)**:
-  - Verifica novas versões diretamente nos **Releases do GitHub** (`SammyKunimatsu/Inputrix`), baixa o instalador dentro do próprio aplicativo com barra de progresso e executa a atualização automaticamente.
+  - Verifica novas versões diretamente nos [**Releases do GitHub**](https://github.com/SammyKunimatsu/Inputrix/releases), baixa o instalador dentro do próprio aplicativo com barra de progresso e executa a atualização automaticamente.
   - Opção para participar do canal **Beta Tester** (recebendo versões `Pre-release` antecipadas) ou permanecer apenas no canal **Estável**.
 
 ---
@@ -101,7 +117,7 @@ Para compilar o código TypeScript e empacotar o instalador customizado NSIS par
 npm run dist:win
 ```
 
-O instalador final (`Inputrix-Setup-1.0.0.exe`) será gerado na pasta `release/`, pronto para ser anexado em uma **Release do GitHub** para alimentar o sistema de atualização automática.
+O instalador final (`Inputrix-Setup-1.0.0.exe`) será gerado na pasta `release/`, pronto para ser anexado em uma [**Release do GitHub**](https://github.com/SammyKunimatsu/Inputrix/releases) para alimentar o sistema de atualização automática.
 
 ---
 
