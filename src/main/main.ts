@@ -152,18 +152,26 @@ const sendToEngine = (obj: any) => {
   if (pyProc && pyProc.stdin && pyProc.stdin.writable) pyProc.stdin.write(JSON.stringify(obj) + '\n')
 }
 
-const syncSafeRects = () => {
-  const rects: Array<{ x: number; y: number; width: number; height: number }> = []
-  const pushWin = (win: BrowserWindow | null) => {
-    if (!win || win.isDestroyed() || !win.isVisible() || win.isMinimized()) return
-    const b = win.getBounds()
-    const disp = screen.getDisplayMatching(b)
-    const sf = disp ? (disp.scaleFactor || 1) : 1
-    rects.push({ x: Math.round(b.x * sf), y: Math.round(b.y * sf), width: Math.round(b.width * sf), height: Math.round(b.height * sf) })
-  }
-  pushWin(mainWindow)
-  pushWin(overlayWindow)
-  sendToEngine({ cmd: 'set_safe_rects', rects })
+let lastNotifiedVersion = ''
+let hoverMain = false
+let hoverOverlay = false
+
+const syncHoverToEngine = () => {
+  sendToEngine({ cmd: 'set_hover', over: Boolean(hoverMain || hoverOverlay) })
+}
+
+const runSilentUpdateCheck = async () => {
+  if (!appSettings.autoCheckUpdates) return
+  try {
+    const res = await checkGitHubUpdates(APP_VERSION, appSettings.allowBeta)
+    if (res.hasUpdate && !res.error && mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update-available', res)
+      if (res.latestVersion !== lastNotifiedVersion) {
+        lastNotifiedVersion = res.latestVersion
+        notifyOS('Atualização Disponível · Inputrix', `A versão v${res.latestVersion} está pronta para instalar no aplicativo.`)
+      }
+    }
+  } catch (_e) {}
 }
 
 const registerHotkeys = (hk: Partial<typeof currentHotkeys>) => {
@@ -209,15 +217,17 @@ const createOverlayWindow = (): BrowserWindow => {
 
   overlayWindow.setAlwaysOnTop(true, 'screen-saver')
   overlayWindow.loadFile(path.join(__dirname, '..', 'renderer', 'overlay.html'))
-  const winEvents = ['move', 'resize', 'show', 'hide', 'minimize', 'restore'] as const
-  winEvents.forEach((ev) => overlayWindow?.on(ev as any, syncSafeRects))
   overlayWindow.webContents.on('did-finish-load', () => {
     if (overlayWindow && !overlayWindow.isDestroyed()) overlayWindow.webContents.send('theme-changed', appSettings.theme)
-    syncSafeRects()
+  })
+  overlayWindow.on('hide', () => {
+    hoverOverlay = false
+    syncHoverToEngine()
   })
   overlayWindow.on('closed', () => {
     overlayWindow = null
-    syncSafeRects()
+    hoverOverlay = false
+    syncHoverToEngine()
     if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('overlay-state', false)
     updateTrayMenu()
   })
@@ -232,7 +242,6 @@ const setOverlayVisibility = (visible: boolean): boolean => {
   } else {
     win.hide()
   }
-  syncSafeRects()
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('overlay-state', visible)
   updateTrayMenu()
   return visible
@@ -312,19 +321,19 @@ const createWindow = () => {
   })
 
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'))
-  const winEvents = ['move', 'resize', 'show', 'hide', 'minimize', 'restore'] as const
-  winEvents.forEach((ev) => mainWindow?.on(ev as any, syncSafeRects))
-  mainWindow.webContents.on('did-finish-load', async () => {
-    syncSafeRects()
-    if (appSettings.autoCheckUpdates) {
-      const res = await checkGitHubUpdates(APP_VERSION, appSettings.allowBeta)
-      if (res.hasUpdate && mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('update-available', res)
-        notifyOS('Atualização Disponível · Inputrix', `A versão v${res.latestVersion} está pronta para instalar no aplicativo.`)
-      }
-    }
+  mainWindow.webContents.on('did-finish-load', () => {
+    runSilentUpdateCheck()
+    setInterval(runSilentUpdateCheck, 30000)
   })
 
+  mainWindow.on('minimize', () => {
+    hoverMain = false
+    syncHoverToEngine()
+  })
+  mainWindow.on('hide', () => {
+    hoverMain = false
+    syncHoverToEngine()
+  })
   mainWindow.on('close', (e) => {
     if (!isQuitting) {
       e.preventDefault()
@@ -346,6 +355,11 @@ app.whenReady().then(() => {
 })
 
 ipcMain.on('engine-cmd', (_e, payload) => sendToEngine(payload))
+ipcMain.on('set-hover-state', (_e, { source, over }) => {
+  if (source === 'main') hoverMain = Boolean(over)
+  else if (source === 'overlay') hoverOverlay = Boolean(over)
+  syncHoverToEngine()
+})
 ipcMain.handle('set-hotkeys', (_e, hk) => {
   registerHotkeys(hk)
   updateTrayMenu()

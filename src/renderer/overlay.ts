@@ -41,6 +41,9 @@
   $('rngHudOpacity').addEventListener('input', (e: any) => winApi.setOverlayOpacity(e.target.value))
   $('btnCloseHud').addEventListener('click', () => winApi.windowControl('close-overlay'))
 
+  document.documentElement.addEventListener('mouseenter', () => winApi.setHoverState('overlay', true))
+  document.documentElement.addEventListener('mouseleave', () => winApi.setHoverState('overlay', false))
+
   winApi.onThemeChanged((theme: string) => {
     document.documentElement.setAttribute('data-theme', theme)
   })

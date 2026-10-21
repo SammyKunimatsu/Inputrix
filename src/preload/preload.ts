@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld('api', {
   checkForUpdates: (allowBeta?: boolean) => ipcRenderer.invoke('check-updates', allowBeta),
   installUpdate: (downloadUrl: string, assetName: string) => ipcRenderer.invoke('install-update', { downloadUrl, assetName }),
   openExternal: (url: string) => ipcRenderer.send('open-external', url),
+  setHoverState: (source: string, over: boolean) => ipcRenderer.send('set-hover-state', { source, over }),
   onEngineEvent: (cb: (data: any) => void) => ipcRenderer.on('engine-event', (_e, data) => cb(data)),
   onHotkeyTriggered: (cb: (target: string) => void) => ipcRenderer.on('hotkey-triggered', (_e, target) => cb(target)),
   onOverlayState: (cb: (visible: boolean) => void) => ipcRenderer.on('overlay-state', (_e, visible) => cb(visible)),

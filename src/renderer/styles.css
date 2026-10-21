@@ -123,7 +123,10 @@ body {
 }
 .top-action-btn:hover, .pin-control:hover { color: var(--text); background: var(--raised); }
 .top-action-btn.active { color: var(--text); border-bottom: 1px solid var(--accent); }
-.top-action-btn.update-alert { color: var(--pill-positive-ink); background: var(--pill-positive-bg); border-bottom: 1px solid var(--positive); }
+.top-action-btn.update-alert { color: var(--pill-positive-ink); background: var(--pill-positive-bg); border-bottom: 1px solid var(--positive); font-weight: 600; }
+.top-action-btn.update-alert.is-updating { color: var(--text); background: var(--raised); border-bottom: 1px solid var(--accent); cursor: wait; }
+.top-action-btn.update-alert.is-updating svg { animation: updateSpin 0.85s linear infinite; }
+@keyframes updateSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .pin-control input { display: none; }
 .pin-control:has(input:checked) { color: var(--text); border-bottom: 1px solid var(--accent); }
 

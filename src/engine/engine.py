@@ -53,7 +53,11 @@ user32.GetAncestor.argtypes = [wintypes.HWND, wintypes.UINT]
 user32.GetAncestor.restype = wintypes.HWND
 
 GA_ROOT = 2
-safe_rects = []
+app_hovered = False
+try:
+  user32.SetProcessDPIAware()
+except Exception:
+  pass
 
 def emit(data):
   with io_lock:
@@ -66,18 +70,7 @@ def get_cursor_pos():
   return { 'x': pt.x, 'y': pt.y }
 
 def is_cursor_over_app():
-  pt = POINT()
-  user32.GetCursorPos(ctypes.byref(pt))
-  hwnd = user32.WindowFromPoint(pt)
-  if hwnd:
-    root = user32.GetAncestor(hwnd, GA_ROOT) or hwnd
-    buf = ctypes.create_unicode_buffer(128)
-    user32.GetWindowTextW(root, buf, 128)
-    if buf.value in ('Inputrix', 'Inputrix Miniatura'): return True
-  for r in safe_rects:
-    if r['x'] <= pt.x <= r['x'] + r['width'] and r['y'] <= pt.y <= r['y'] + r['height']:
-      return True
-  return False
+  return bool(app_hovered)
 
 def _press_key_once(vk, scan, ext, is_up=False):
   up_flag = KEYEVENTF_KEYUP if is_up else 0
@@ -460,7 +453,7 @@ def telemetry_broadcaster():
     time.sleep(0.08)
 
 def main():
-  global safe_rects
+  global app_hovered
   t_thread = threading.Thread(target=telemetry_broadcaster, daemon=True)
   t_thread.start()
   emit({ 'event': 'ready' })
@@ -475,13 +468,17 @@ def main():
       elif cmd == 'stop_key': key_mgr.stop_all()
       elif cmd == 'start_mouse': mouse_worker.start(msg.get('config', {}))
       elif cmd == 'stop_mouse': mouse_worker.stop()
-      elif cmd == 'set_safe_rects': safe_rects = msg.get('rects', [])
+      elif cmd == 'set_hover': app_hovered = bool(msg.get('over', False))
       elif cmd == 'stop_all':
         key_mgr.stop_all()
         mouse_worker.stop()
       elif cmd == 'get_cursor':
         pos = get_cursor_pos()
         emit({ 'event': 'cursor', 'x': pos['x'], 'y': pos['y'] })
+      elif cmd == 'quit':
+        key_mgr.stop_all(silent=True)
+        mouse_worker.stop()
+        sys.exit(0)
     except Exception as e:
       emit({ 'event': 'error', 'message': str(e) })
 

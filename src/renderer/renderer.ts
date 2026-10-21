@@ -49,6 +49,7 @@
   let savedProfiles: any[] = []
   let repoUrl = 'https://github.com/SammyKunimatsu/Inputrix'
   let pendingUpdate: any = null
+  let isInstallingUpdate = false
 
   const applyTheme = (theme: string) => {
     currentTheme = theme === 'light' ? 'light' : 'dark'
@@ -59,6 +60,9 @@
   }
 
   applyTheme(currentTheme)
+
+  document.documentElement.addEventListener('mouseenter', () => winApi.setHoverState('main', true))
+  document.documentElement.addEventListener('mouseleave', () => winApi.setHoverState('main', false))
 
   $('btnThemeToggle').addEventListener('click', () => applyTheme(currentTheme === 'dark' ? 'light' : 'dark'))
   $('btnToggleOverlay').addEventListener('click', () => winApi.toggleOverlay())
@@ -80,7 +84,6 @@
     btn.addEventListener('click', () => openTab(btn.dataset.tab))
   })
 
-  $('btnTopUpdateBanner').addEventListener('click', () => openTab('tab-settings'))
   $('btnOpenGitHubTop').addEventListener('click', () => winApi.openExternal(repoUrl))
   $('btnOpenGitHubFooter').addEventListener('click', () => winApi.openExternal(repoUrl))
   $('btnOpenGitHubCard').addEventListener('click', () => winApi.openExternal(repoUrl))
@@ -362,13 +365,13 @@
     }
   }
 
-  const showUpdateResult = (res: any) => {
+  const showUpdateResult = (res: any, isManual = false) => {
     if (res.error) {
-      $('lblUpdateStatusText').textContent = `Aviso: ${res.error}`
+      if (isManual) $('lblUpdateStatusText').textContent = `Aviso: ${res.error}`
       return
     }
     if (!res.hasUpdate) {
-      $('lblUpdateStatusText').textContent = `Você já está na versão mais recente (v${res.currentVersion}) para o canal selecionado.`
+      if (isManual) $('lblUpdateStatusText').textContent = `Você já está na versão mais recente (v${res.currentVersion}) para o canal selecionado.`
       $('boxUpdateFound').classList.add('is-hidden')
       $('btnTopUpdateBanner').classList.add('is-hidden')
       $('pillUpdateNav').classList.add('is-hidden')
@@ -382,10 +385,33 @@
     $('lblReleaseChannelBadge').textContent = channelLabel
     $('lblReleaseNotes').textContent = res.releaseNotes || 'Melhorias de desempenho e novos recursos.'
     $('boxUpdateFound').classList.remove('is-hidden')
-    $('lblTopUpdateText').textContent = `Atualizar para v${res.latestVersion}`
+    if (!isInstallingUpdate) $('lblTopUpdateText').textContent = `Atualizar para v${res.latestVersion}`
     $('btnTopUpdateBanner').classList.remove('is-hidden')
     $('pillUpdateNav').textContent = `v${res.latestVersion}`
     $('pillUpdateNav').classList.remove('is-hidden')
+  }
+
+  const triggerUpdateInstallation = async () => {
+    if (!pendingUpdate || isInstallingUpdate) return
+    if (!pendingUpdate.downloadUrl) {
+      winApi.openExternal(pendingUpdate.htmlUrl || `${repoUrl}/releases`)
+      return
+    }
+    isInstallingUpdate = true
+    $('btnTopUpdateBanner').classList.add('is-updating')
+    $('lblTopUpdateText').textContent = 'Atualizando... 0%'
+    $('btnInstallUpdateNow').disabled = true
+    $('btnInstallUpdateNow').textContent = 'Baixando instalador...'
+    $('boxUpdateProgress').classList.remove('is-hidden')
+    const res = await winApi.installUpdate(pendingUpdate.downloadUrl, pendingUpdate.assetName)
+    if (!res.ok) {
+      isInstallingUpdate = false
+      $('btnTopUpdateBanner').classList.remove('is-updating')
+      $('lblTopUpdateText').textContent = `Atualizar para v${pendingUpdate.latestVersion}`
+      $('btnInstallUpdateNow').disabled = false
+      $('btnInstallUpdateNow').textContent = 'Baixar e instalar atualização agora'
+      $('lblUpdateStatusText').textContent = `Falha na instalação automática: ${res.error}`
+    }
   }
 
   const initApp = async () => {
@@ -410,9 +436,8 @@
   $('chkBetaChannel').addEventListener('change', async (e: any) => {
     const allowBeta = Boolean(e.target.checked)
     await winApi.saveSettings({ allowBeta })
-    $('lblUpdateStatusText').textContent = 'Verificando canal selecionado...'
     const res = await winApi.checkForUpdates(allowBeta)
-    showUpdateResult(res)
+    showUpdateResult(res, false)
   })
 
   $('chkAutoUpdate').addEventListener('change', (e: any) => {
@@ -422,28 +447,15 @@
   $('btnCheckUpdateNow').addEventListener('click', async () => {
     $('lblUpdateStatusText').textContent = 'Consultando releases no GitHub...'
     const res = await winApi.checkForUpdates($('chkBetaChannel').checked)
-    showUpdateResult(res)
+    showUpdateResult(res, true)
   })
 
-  $('btnInstallUpdateNow').addEventListener('click', async () => {
-    if (!pendingUpdate) return
-    if (!pendingUpdate.downloadUrl) {
-      winApi.openExternal(pendingUpdate.htmlUrl || `${repoUrl}/releases`)
-      return
-    }
-    $('btnInstallUpdateNow').disabled = true
-    $('btnInstallUpdateNow').textContent = 'Baixando instalador...'
-    $('boxUpdateProgress').classList.remove('is-hidden')
-    const res = await winApi.installUpdate(pendingUpdate.downloadUrl, pendingUpdate.assetName)
-    if (!res.ok) {
-      $('btnInstallUpdateNow').disabled = false
-      $('btnInstallUpdateNow').textContent = 'Baixar e instalar atualização agora'
-      $('lblUpdateStatusText').textContent = `Falha na instalação automática: ${res.error}`
-    }
-  })
+  $('btnTopUpdateBanner').addEventListener('click', triggerUpdateInstallation)
+  $('btnInstallUpdateNow').addEventListener('click', triggerUpdateInstallation)
 
-  winApi.onUpdateAvailable((res: any) => showUpdateResult(res))
+  winApi.onUpdateAvailable((res: any) => showUpdateResult(res, false))
   winApi.onUpdateProgress((prog: any) => {
+    $('lblTopUpdateText').textContent = `Atualizando... ${prog.pct}%`
     $('boxUpdateProgress').classList.remove('is-hidden')
     $('lblUpdateProgressText').textContent = `Baixando instalador (${prog.recMb} MB / ${prog.totMb} MB)...`
     $('lblUpdateProgressPct').textContent = `${prog.pct}%`

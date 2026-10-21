@@ -1,7 +1,7 @@
 {
   "name": "inputrix",
   "productName": "Inputrix",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Inputrix — Sequenciador de Teclado e Atuador de Mouse de Alta Precisão",
   "author": "SammyKunimatsu",
   "license": "MIT",
@@ -13,10 +13,11 @@
   "scripts": {
     "build:ts": "tsc",
     "copy:static": "node scripts/copy-static.cjs",
+    "build:engine": "pyinstaller --onefile --noconsole --distpath src/engine --workpath release/pybuild --specpath release/pybuild src/engine/engine.py",
     "build": "npm run build:ts && npm run copy:static",
     "start": "npm run build && electron .",
-    "dist": "npm run build && electron-builder --win nsis",
-    "dist:win": "npm run build && electron-builder --win nsis"
+    "dist": "npm run build:engine && npm run build && electron-builder --win nsis",
+    "dist:win": "npm run build:engine && npm run build && electron-builder --win nsis"
   },
   "build": {
     "appId": "com.sammykunimatsu.inputrix",
