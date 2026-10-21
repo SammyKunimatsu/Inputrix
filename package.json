@@ -1,0 +1,61 @@
+{
+  "name": "inputrix",
+  "productName": "Inputrix",
+  "version": "1.0.0",
+  "description": "Inputrix — Sequenciador de Teclado e Atuador de Mouse de Alta Precisão",
+  "author": "SammyKunimatsu",
+  "license": "MIT",
+  "main": "dist/main/main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SammyKunimatsu/Inputrix.git"
+  },
+  "scripts": {
+    "build:ts": "tsc",
+    "copy:static": "node scripts/copy-static.cjs",
+    "build": "npm run build:ts && npm run copy:static",
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder --win nsis"
+  },
+  "build": {
+    "appId": "com.sammykunimatsu.inputrix",
+    "productName": "Inputrix",
+    "directories": {
+      "output": "release"
+    },
+    "files": ["dist/**/*", "assets/**/*", "package.json"],
+    "extraResources": [
+      { "from": "src/engine/engine.py", "to": "engine.py" }
+    ],
+    "win": {
+      "target": ["nsis"],
+      "icon": "assets/icon.ico",
+      "artifactName": "Inputrix-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Inputrix",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "installerSidebar": "assets/installer-sidebar.bmp",
+      "uninstallerSidebar": "assets/installer-sidebar.bmp",
+      "installerHeader": "assets/installer-header.bmp",
+      "include": "build/installer.nsh"
+    },
+    "publish": [
+      { "provider": "github", "owner": "SammyKunimatsu", "repo": "Inputrix" }
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.6.3"
+  }
+}

@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Compiled & Build Output
+dist/
+release/
+out/
+__pycache__/
+*.py[cod]
+
+# Local User Data & Cache
+saves.json
+settings.json
+*.log
+npm-debug.log*
+
+# AI / Agent / Skill Directories & Files (Never commit)
+.agent/
+.agents/
+.codex/
+.gemini/
+.taste-skill/
+.claude/
+.cursor/
+.impeccable/
+.opencode/
+skills-lock.json
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
